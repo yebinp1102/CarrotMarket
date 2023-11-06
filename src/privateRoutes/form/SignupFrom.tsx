@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {FaCarrot} from 'react-icons/fa'
 import Loader from '@/components/shared/Loader';
+import { createUserAccount } from '@/lib/appwrite/api';
 
 const SignupFrom = () => {
 
@@ -23,8 +24,9 @@ const SignupFrom = () => {
     },
   })
 
-  const handleSignup = async () => {
-
+  const handleSignup = async (user: z.infer<typeof SignupValidation>) => {
+    const newUser = await createUserAccount(user)
+    console.log(newUser);
   }
 
   return (
