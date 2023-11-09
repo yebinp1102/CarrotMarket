@@ -1,10 +1,11 @@
 import './global.css';
 import { Routes, Route } from 'react-router-dom';
-import SignInForm from './privateRoutes/form/SignInForm';
-import SignupFrom from './privateRoutes/form/SignupFrom';
-import AuthLayout from './privateRoutes/AuthLayout';
-import RootLayout from './publicRoutes/RootLayout';
-import Home from './publicRoutes/pages/Home';
+import SignInForm from './publicRoutes/form/SignInForm';
+import SignupFrom from './publicRoutes/form/SignupFrom';
+import AuthLayout from './publicRoutes/AuthLayout';
+import RootLayout from './privateRoutes/RootLayout';
+import Home from './privateRoutes/pages/Home';
+import { Toaster } from './components/ui/toaster';
 
 const App = () => {
   return (
@@ -21,6 +22,8 @@ const App = () => {
           <Route index element={<Home />} />
         </Route>
       </Routes>
+
+      <Toaster />
     </main>
   )
 }
