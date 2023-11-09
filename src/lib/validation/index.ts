@@ -7,3 +7,8 @@ export const SignupValidation = z.object({
   email: z.string().email(),
   password: z.string().min(8, {message: "Password must be longer than 8 characters. 비밀번호는 최소한 8자리 이상이어야 합니다."})
 })
+
+export const SigninValidation = z.object({
+  email: z.string().email(),
+  password: z.string().min(8, {message: "Password must be longer than 8 characters. 비밀번호는 최소한 8자리 이상이어야 합니다."})
+})
