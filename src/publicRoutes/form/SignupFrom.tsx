@@ -8,11 +8,15 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {FaCarrot} from 'react-icons/fa'
 import Loader from '@/components/shared/Loader';
-import { createUserAccount } from '@/lib/appwrite/api';
+import { useToast } from '@/components/ui/use-toast';
+import { useCreateUserAccount, useSignInAccount } from '@/lib/react-query/queries';
+import { useUserContext } from '@/context/AuthContext';
 
 const SignupFrom = () => {
+  const {toast} = useToast();
+  const navigate = useNavigate();
+  const {checkAuthUser, isLoading: isUserLoading} = useUserContext();
 
-  const isLoading = false;
 
   const form = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
@@ -24,9 +28,43 @@ const SignupFrom = () => {
     },
   })
 
+  // Queries
+  const {mutateAsync: createUserAccount, isLoading: isCreatingAccount} = useCreateUserAccount();
+  const {mutateAsync: signInAccount, isLoading: isSigningInUser} = useSignInAccount();
+
   const handleSignup = async (user: z.infer<typeof SignupValidation>) => {
-    const newUser = await createUserAccount(user)
-    console.log(newUser);
+    try{
+      const newUser = await createUserAccount(user)
+    
+      if(!newUser){
+        toast({title: "Sign up failed. Please try again. 회원가입에 실패했습니다. 다시 시도해주세요."});
+        return;
+      } 
+
+      const session = await signInAccount({
+        email: user.email,
+        password: user.password
+      })
+
+      if(!session){
+        toast({title: "Something went wrong. Please login your new account. 에러가 발생했습니다. 새 계정에 로그인 해주세요."});
+        navigate("/sign-in");
+        return;
+      }
+
+      const isLoggedIn = await checkAuthUser();
+
+      if(isLoggedIn){
+        form.reset();
+        navigate("/");
+      }else{
+        toast({title: "Login failed. Please try again. 로그인에 실패했습니다. 다시 시도해주세요."})
+        return;
+      }
+
+    }catch(err){
+      console.log({err});
+    }
   }
 
   return (
@@ -111,7 +149,7 @@ const SignupFrom = () => {
 
           {/* Submit Btn */}
           <Button type='submit' className='shad-button_primary'>
-            {isLoading ? (
+            {isCreatingAccount || isUserLoading || isSigningInUser ? (
               <div className='flex-center gap-2'>
                 <Loader /> Loading...
               </div>
