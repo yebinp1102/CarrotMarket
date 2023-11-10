@@ -31,8 +31,9 @@ const Topbar = () => {
           </div>
         </Link>
 
-        {/* Logout Btn */}
         <div className="flex gap-3">
+
+          {/* User img */}
           <Link to={`/profile/${user.id}`} className="flex-center">
             <img 
               src={user.imageUrl || "/assets/icons/profile-placeholder.svg"}
@@ -40,7 +41,9 @@ const Topbar = () => {
               alt="profile"
             />
           </Link>
-          <Button variant="ghost" className="" onClick={() => signOut()}>
+          
+        {/* Logout Btn */}
+          <Button variant="ghost" onClick={() => signOut()}>
             <GrLogout size={27} color="#f97516" className="grIcon"/>
           </Button>
         </div>
