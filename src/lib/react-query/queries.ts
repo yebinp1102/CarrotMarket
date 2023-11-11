@@ -5,7 +5,7 @@ import {
   useInfiniteQuery
 } from '@tanstack/react-query';
 
-import { createPost, createUserAccount, signInAccount, signOutAccount } from '@/lib/appwrite/api.ts';
+import { createPost, createUserAccount, getRecentPosts, signInAccount, signOutAccount } from '@/lib/appwrite/api.ts';
 import { INewPost, INewUser } from '@/types';
 import { QUERY_KEYS } from './queryKeys';
 
@@ -46,3 +46,10 @@ export const useCreatePost = () => {
     },
   });
 };
+
+export const useGetRecentPosts = () => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+    queryFn: getRecentPosts, // useGetRecentPosts를 호출하면 실행하는 코드
+  })
+}

@@ -194,3 +194,14 @@ export async function deleteFile(fileId: string){
     console.log(err)
   }
 }
+
+export async function getRecentPosts () {
+  const posts = await databases.listDocuments(
+    appwriteConfig.databaseId,
+    appwriteConfig.postCollectionId,
+    [Query.orderDesc('$createdAt'), Query.limit(20)] // post 20개씩 fetch 하며, 제일 최근에 생성된 것이 제일 위로 오도록 정렬
+  )
+
+  if(!posts) throw Error;
+  return posts;
+}
