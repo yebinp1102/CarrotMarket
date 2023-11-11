@@ -10,6 +10,9 @@ import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
 import FileUploader from './FileUploader';
 import { Models } from 'appwrite';
+import { useCreatePost } from '@/lib/react-query/queries';
+import { useUserContext } from '@/context/AuthContext';
+import { useToast } from '../ui/use-toast';
 
 type Props = {
   post?: Models.Document
@@ -17,6 +20,9 @@ type Props = {
 
 const PostForm = ({post}: Props) => {
   const navigate = useNavigate();
+  const {mutateAsync : createPost , isLoading} = useCreatePost();
+  const {user} = useUserContext();
+  const {toast} = useToast();
 
   // example
   const form = useForm<z.infer<typeof PostValidation>>({
@@ -29,8 +35,19 @@ const PostForm = ({post}: Props) => {
     }
   })
 
-  const handleCreatePost = () => {
+  async function handleCreatePost (value: z.infer<typeof PostValidation>) {
+    // ACTION = CREATE
+    const newPost = await createPost({
+      ...value,
+      userId: user.id,
+    });
 
+    if (!newPost) {
+      toast({
+        title: `Post failed. Please try again. 새 글 생성에 실패했습니다. 다시 시도해주세요.`,
+      });
+    }
+    navigate("/");
   }
 
   return (
