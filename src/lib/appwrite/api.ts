@@ -108,6 +108,9 @@ export async function signOutAccount() {
   }
 }
 
+// ============================================================
+// POSTS
+// ============================================================
 
 export async function createPost(post: INewPost){
   try{
@@ -168,7 +171,7 @@ export async function uploadFile(file: File){
   }
 }
 
-export async function getFilePreview(fileId:string) {
+export function getFilePreview(fileId: string) {
   try {
     const fileUrl = storage.getFilePreview(
       appwriteConfig.storageId,
@@ -179,9 +182,11 @@ export async function getFilePreview(fileId:string) {
       100
     );
 
-    return fileUrl
-  }catch(err) {
-    console.log(err)
+    if (!fileUrl) throw Error;
+
+    return fileUrl;
+  } catch (err) {
+    console.log(err);
   }
 }
 
