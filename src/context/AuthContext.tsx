@@ -1,4 +1,4 @@
-import { getCurrnetUser } from "@/lib/appwrite/api"
+import { getCurrentUser } from "@/lib/appwrite/api"
 import { IUser } from "@/types"
 import React, { createContext, useContext, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const checkAuthUser = async () => {
     setIsLoading(true);
     try{
-      const currentAccount = await getCurrnetUser();
+      const currentAccount = await getCurrentUser();
       if(currentAccount){
         setUser({
           id: currentAccount.$id,

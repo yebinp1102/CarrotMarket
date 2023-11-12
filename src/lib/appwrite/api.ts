@@ -77,7 +77,7 @@ export async function getAccount(){
 
 
 // Get user
-export async function getCurrnetUser() {
+export async function getCurrentUser() {
   try {
     const currentAccount = await getAccount();
 
@@ -209,4 +209,59 @@ export async function getRecentPosts () {
 
   if(!posts) throw Error;
   return posts;
+}
+
+export async function likePost(postId: string, likesArray: string[]){
+  try{
+    const updatedPost = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      postId,
+      {
+        likes: likesArray
+      }
+    )
+
+    if(!updatedPost) throw Error;
+
+    return updatedPost;
+  }catch(err){
+    console.log(err);
+  }
+}
+
+export async function savePost(postId: string, userId: string){
+  try{
+    const updatedPost = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.savesCollectionId,
+      ID.unique(),
+      {
+        user: userId,
+        post: postId
+      }
+    )
+
+    if(!updatedPost) throw Error;
+
+    return updatedPost;
+  }catch(err){
+    console.log(err);
+  }
+}
+
+export async function deleteSavedPost(savedId: string){
+  try{
+    const statusCode = await databases.deleteDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.savesCollectionId,
+      savedId
+    )
+
+    if(!statusCode) throw Error;
+
+    return {status: 'ok'};
+  }catch(err){
+    console.log(err);
+  }
 }
