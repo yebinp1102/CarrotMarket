@@ -10,7 +10,7 @@ import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
 import FileUploader from './FileUploader';
 import { Models } from 'appwrite';
-import { useCreatePost } from '@/lib/react-query/queries';
+import { useCreatePost, useUpdatePost } from '@/lib/react-query/queries';
 import { useUserContext } from '@/context/AuthContext';
 import { useToast } from '../ui/use-toast';
 
@@ -21,7 +21,8 @@ type Props = {
 
 const PostForm = ({post, action}: Props) => {
   const navigate = useNavigate();
-  const {mutateAsync : createPost , isLoading} = useCreatePost();
+  const {mutateAsync : createPost , isLoading: isLoadingCreate} = useCreatePost();
+  const {mutateAsync:updatePost, isLoading: isLoadingUpdate} = useUpdatePost();
   const {user} = useUserContext();
   const {toast} = useToast();
 
@@ -37,6 +38,21 @@ const PostForm = ({post, action}: Props) => {
   })
 
   async function handleCreatePost (value: z.infer<typeof PostValidation>) {
+    if(post && action === 'Update'){
+      const updatedPost = await updatePost({
+        ...value,
+        postId: post.$id,
+        imageId: post?.imageId,
+        imageUrl: post?.imageUrl,
+      })
+
+      if(!updatedPost){
+        toast({title: "Please try again. 업데이트 요청 실패. 다시 시도해주세요."})
+      }
+
+      // 성공적으로 업데이트 되었는지 확인하기 위해서 해당 포스트 디테일 페이지로 이동
+      return navigate(`/posts/${post.$id}`)
+    }
     // ACTION = CREATE
     const newPost = await createPost({
       ...value,
@@ -132,8 +148,10 @@ const PostForm = ({post, action}: Props) => {
           <Button
             type='submit'
             className='shad-button_primary whitespace-nowrap'
+            disabled={isLoadingCreate || isLoadingUpdate}
           >
-            Post
+            {isLoadingCreate || isLoadingUpdate && 'Loading...' }
+            {action}
           </Button>
         </div>
         

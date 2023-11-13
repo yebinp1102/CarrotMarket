@@ -1,11 +1,11 @@
 import {
-  useQuery,
-  useMutation,
+  useQuery,  // use when fetching data
+  useMutation,  // use when update data
   useQueryClient
 } from '@tanstack/react-query';
 
-import { createPost, createUserAccount, deleteSavedPost, getCurrentUser, getPostById, getRecentPosts, likePost, savePost, signInAccount, signOutAccount } from '@/lib/appwrite/api.ts';
-import { INewPost, INewUser } from '@/types';
+import { createPost, createUserAccount, deletePost, deleteSavedPost, getCurrentUser, getPostById, getRecentPosts, likePost, savePost, signInAccount, signOutAccount, updatePost } from '@/lib/appwrite/api.ts';
+import { INewPost, INewUser, IUpdatePost } from '@/types';
 import { QUERY_KEYS } from './queryKeys';
 
 
@@ -126,5 +126,31 @@ export const useGetPostById = (postId?: string) => {
     queryKey: [QUERY_KEYS.GET_POST_BY_ID, postId],
     queryFn: () => getPostById(postId),
     enabled: !!postId
+  })
+}
+
+export const useUpdatePost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (post: IUpdatePost) => updatePost(post),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id]
+      })
+    }
+  })
+}
+
+export const useDeletePost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({postId, imageId}: {postId: string, imageId: string}) => deletePost(postId, imageId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_RECENT_POSTS]
+      })
+    }
   })
 }
