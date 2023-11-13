@@ -1,6 +1,6 @@
 import { ID, Query } from "appwrite";
 import { account, appwriteConfig, avatars, databases, storage } from "./config.ts";
-import { INewPost, INewUser } from "@/types";
+import { INewPost, INewUser, IUpdatePost } from "@/types";
 
 
 
@@ -265,3 +265,71 @@ export async function deleteSavedPost(savedId: string){
     console.log(err);
   }
 }
+
+export async function getPostById(postId: string) {
+  try{
+    const post = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      postId
+    )
+
+    return post;
+  }catch(err){
+    console.log(err);
+  }
+}
+
+export async function updatePost(post: IUpdatePost) {
+  const hasFileToUpdate = post.file.length > 0;
+
+  try{    
+    let image = {
+      imageUrl : post.imageUrl,
+      imageId: post.imageId
+    }
+
+    if(hasFileToUpdate){
+      // Upload file to appwrite storage
+      const uploadedFile = await uploadFile(post.file[0])  
+      if(!uploadedFile) throw Error;
+    
+      // Get file url
+      const fileUrl = getFilePreview(uploadedFile.$id);
+
+      if(!fileUrl) {
+        deleteFile(uploadedFile.$id);
+        throw Error;
+      }
+
+      image = {...image, imageUrl: fileUrl, imageId: uploadedFile.$id}
+    }
+
+    // Convert tags in to arr
+    const tags = post.tags?.replace(/ /g, '').split(',') || [];
+
+    // Save post to DB
+    const updatedPost = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      post.postId,
+      {
+        caption: post.caption,
+        imageUrl: image.imageUrl,
+        imageId: image.imageId,
+        location: post.location,
+        tags: tags
+      }
+    )
+    
+    if(!updatedPost){
+      await deleteFile(post.imageId);
+      throw Error
+    }
+
+    return updatedPost;
+  }catch(err){
+    console.log(err);
+  }
+}
+

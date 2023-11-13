@@ -15,10 +15,11 @@ import { useUserContext } from '@/context/AuthContext';
 import { useToast } from '../ui/use-toast';
 
 type Props = {
-  post?: Models.Document
+  post?: Models.Document,
+  action: 'Create' | 'Update'
 }
 
-const PostForm = ({post}: Props) => {
+const PostForm = ({post, action}: Props) => {
   const navigate = useNavigate();
   const {mutateAsync : createPost , isLoading} = useCreatePost();
   const {user} = useUserContext();
@@ -31,7 +32,7 @@ const PostForm = ({post}: Props) => {
       caption: post ? post?.caption : "",
       file: [],
       location: post ? post?.location : "",
-      tags: post ? post.tag.join(',') : "",
+      tags: post ? post.tags.join(",") : "",
     }
   })
 
