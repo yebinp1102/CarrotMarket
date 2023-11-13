@@ -173,7 +173,7 @@ export const useGetPosts = () => {
 
 export const useSearchPosts = (searchTerm: string) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.SEARCH_POSTS],
+    queryKey: [QUERY_KEYS.SEARCH_POSTS, searchTerm], // validate query again, when searchTerm changes
     queryFn: () => searchPosts(searchTerm),
     enabled: !!searchTerm // when searchTerm changes, useSearchPosts query will be automatically fetched.
   })
