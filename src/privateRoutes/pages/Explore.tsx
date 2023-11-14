@@ -1,19 +1,40 @@
 import GridPostList from '@/components/shared/GridPostList';
-import SearchResults from '@/components/shared/SearchResults';
 import { Input } from '@/components/ui/input';
 import useDebounce from '@/hooks/useDebounce';
 import { useGetPosts, useSearchPosts } from '@/lib/react-query/queries';
 import { Loader } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {BsSearch, BsFilter} from 'react-icons/bs';
+import {useInView} from 'react-intersection-observer'
+
+type SearchResultProps = {
+  isSearchFetching: boolean;
+  searchedPosts: any;
+}
+const SearchResults = ({ isSearchFetching, searchedPosts }: SearchResultProps) => {
+  if (isSearchFetching) {
+    return <Loader />;
+  } else if (searchedPosts && searchedPosts.documents.length > 0) {
+    return <GridPostList posts={searchedPosts.documents} />;
+  } else {
+    return (
+      <p className="text-light-4 mt-10 text-center w-full">No results found</p>
+    );
+  }
+};
 
 const Explore = () => {
+  const {ref, inView} = useInView();
   const [searchValue, setSearchValue] = useState('');
-  const { data: posts, fetchNextPage: hasNextPage } = useGetPosts();
+  const { data: posts, fetchNextPage, hasNextPage } = useGetPosts();
 
   // when searchValue changes, detect another change after 500 mil sec
   const debouncedValue = useDebounce(searchValue, 500); 
   const { data: searchedPosts, isFetching: isSearchFetching } = useSearchPosts(debouncedValue);
+
+  useEffect(() => {
+    if(inView && !searchValue) fetchNextPage();
+  },[inView, searchValue])
 
   if(!posts){
     return (
@@ -53,7 +74,7 @@ const Explore = () => {
       {/* result of what's popular today */}
       <div className="flex flex-wrap gap-9 w-full max-w-5xl">
         {shouldShowSearchResults ? (
-          <SearchResults 
+          <SearchResults
             isSearchFetching={isSearchFetching}
             searchedPosts={searchedPosts}
           />
@@ -63,6 +84,12 @@ const Explore = () => {
           <GridPostList key={`page-${index}`} posts={item.documents} />
         ))}
       </div>
+
+      {hasNextPage && !searchValue && (
+        <div ref={ref} className='mt-10'>
+          <Loader />
+        </div>
+      )}
     </div>
   )
 }
